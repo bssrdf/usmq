@@ -58,7 +58,7 @@ def createSocket(host,port):
 def generateRandomJapaneseString(minlength, maxlength, minlines, maxlines):
     msg=[]
     base="""東日本大震災に関する情報 ( 消息情報、避難所、義援金受付など ）をまとめたサイトを開設しています。"""
-    base=unicode(base,'utf-8')
+    # base=unicode(base,'utf-8')
     num_lines=random.randint(minlines,maxlines)
     for i in range(0,num_lines):
         num_chars=random.randint(minlength,maxlength)
@@ -66,9 +66,11 @@ def generateRandomJapaneseString(minlength, maxlength, minlines, maxlines):
         for j in range(0,len(base)):
             c=base[random.randint(0,len(base)-1)]
             buffer.append(c)
-        s=unicode('').join(buffer)
+        # s=unicode('').join(buffer)
+        s=''.join(buffer)
         msg.append(s)
-    msg=unicode('\r\n').join(msg)
+    # msg=unicode('\r\n').join(msg)
+    msg='\r\n'.join(msg)
     return msg.encode('utf-8')
 
 def generateRandomString(minlength, maxlength, minlines, maxlines):
@@ -128,7 +130,6 @@ class client(object):
         header="COUNT\r\n"
         self.socket.send(header.encode())
         recv=self.socket.recv(self.n)
-        print('recv = ', recv)
         s = recv.decode()
         if s:
            return int(s)
@@ -265,8 +266,8 @@ class test_mq(object):
         print("Running: test_invalid_messages, N=%s" % N)
         c=client(HOST,PORT,debug=self.debug)
         self.empty_queue(c)
-        #count=c.count()
-        #assert count==0, "Message queue should be empty."
+        count=c.count()
+        assert count==0, "Message queue should be empty."
         invalid_messages=[]
         return_messages=[]
         for i in range(0,N):
