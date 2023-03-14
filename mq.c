@@ -174,7 +174,7 @@ int setnonblock(int fd)
 
 void debug_printf(const char *fmt, ...)
 {
-    if (verbose != 1) {return;}
+    if (verbose == 0) return; /* when -vv we also want to print debug */
     va_list argp;
     va_start(argp, fmt);
     vfprintf(stderr, fmt, argp);
@@ -542,7 +542,9 @@ int main(int argc,
   }
   signal(SIGINT, ctrlc_handler);
 
-  messagelist=(struct linkedlist *)malloc(sizeof(struct linkedlist));
+  //messagelist=(struct linkedlist *)malloc(sizeof(struct linkedlist));
+  /* use initialize to properly set messagelist->count to 0 */
+  messagelist = initialize();
   mqs=(struct mq_state *)malloc(sizeof(struct mq_state));
   accept_base=event_base_new();
 
