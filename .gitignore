@@ -1,0 +1,4 @@
+*.o
+mq
+ablinklist_imp
+.sconsign.dblite
