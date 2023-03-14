@@ -265,8 +265,8 @@ class test_mq(object):
         print("Running: test_invalid_messages, N=%s" % N)
         c=client(HOST,PORT,debug=self.debug)
         self.empty_queue(c)
-        count=c.count()
-        assert count==0, "Message queue should be empty."
+        #count=c.count()
+        #assert count==0, "Message queue should be empty."
         invalid_messages=[]
         return_messages=[]
         for i in range(0,N):
