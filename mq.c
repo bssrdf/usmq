@@ -203,7 +203,7 @@ void buffer_read_cb(struct bufferevent *incoming, void *arg)
       message *msg= (message *)malloc(sizeof(message));
       msg->head=req->head;
       msg->body=req->body;
-      free(req);
+      // free(req);
       append(messagelist, (void *)msg);
   }
   else if (request_type==COUNT_REQUEST) 
@@ -265,6 +265,7 @@ void buffer_read_cb(struct bufferevent *incoming, void *arg)
       evbuffer_add(evreturn,RESPONSE_INVALID_REQUEST,1);
 
   }
+  free(req);
   debug_printf("AFTER OPERATION:\n");
   if (verbose==2) { show_messages(messagelist); }
 
@@ -318,6 +319,7 @@ int parse_request(struct bufferevent *incoming, struct evbuffer *evreturn, reque
          less the length of the PUT string, less 2 for the line feed after
          PUT, less 2 for the linefeed after the message data */
       parse_put_message(incoming, req);
+      int extra_bytes=drain_extra(incoming,msgtype);
       evbuffer_add_printf(evreturn,"%d", req->length);
   }
   else if (msgtype && !strcmp(msgtype,GET)) 
@@ -383,16 +385,17 @@ Returns 0 on success, -1 on failure
   size_t n_read_out;
   // if there's no head, that's an error, so quit
   char *head = evbuffer_readln(incoming->input, &n_read_out, EVBUFFER_EOL_CRLF);
+  debug_printf("head len: %u \n", n_read_out);
   req->head=head;
   char *p;
   char *msglen;
-  //int errno = 0;
+  errno = 0;
   // TODO: this needs to be made a lot more robust
   msglen= evbuffer_readln(incoming->input, &n_read_out, EVBUFFER_EOL_CRLF);
   debug_printf("msglen: %s\n", msglen);
   req->length= strtol(msglen, &p, 10);
   if (errno != 0 || *p != 0 || p == msglen)
-          debug_printf("error! can't convert %s to integer.\n", msglen);
+        debug_printf("error! can't convert %s to integer.\n", msglen);
   char *msg=(char *)malloc(sizeof(char)*((req->length)+1)); // +1 for '\0'
   int bytes_in=evbuffer_remove(incoming->input,msg,req->length);
   msg[req->length]='\0';

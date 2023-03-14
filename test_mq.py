@@ -71,7 +71,28 @@ def generateRandomJapaneseString(minlength, maxlength, minlines, maxlines):
         msg.append(s)
     # msg=unicode('\r\n').join(msg)
     msg='\r\n'.join(msg)
-    return msg.encode('utf-8')
+    # return msg.encode('utf-8')
+    return msg
+
+def generateRandomChineseString(minlength, maxlength, minlines, maxlines):
+    msg=[]
+    base="""上周末曼城顺利拿下水晶宫凭借的是哈兰德一记点球至"""
+    # base=unicode(base,'utf-8')
+    num_lines=random.randint(minlines,maxlines)
+    for i in range(0,num_lines):
+        num_chars=random.randint(minlength,maxlength)
+        buffer=[]
+        for j in range(0,len(base)):
+            c=base[random.randint(0,len(base)-1)]
+            buffer.append(c)
+        # s=unicode('').join(buffer)
+        s=''.join(buffer)
+        msg.append(s)
+    # msg=unicode('\r\n').join(msg)
+    msg='\r\n'.join(msg)
+    # msg='\n'.join(msg)
+    # return msg.encode('utf-8')
+    return msg
 
 def generateRandomString(minlength, maxlength, minlines, maxlines):
     msg=[]
@@ -115,7 +136,10 @@ class client(object):
             <body>
             \r\n
         """
-        nbytes=len(body)
+        # nbytes1=len(body)
+        nbytes=len(body.encode()) # for unicode, len(body) is not the number of bytes
+                                  # body occupies, use encode to get actual bytes 
+        # print('head len, body byte len, body len', len(head), nbytes, nbytes1)
         msg='PUT\r\n%s\r\n%d\r\n%s\r\n' % (head,nbytes,body)
         return msg
     
@@ -389,7 +413,8 @@ class test_mq(object):
 
     def test_reassemble_utf8(self,N):
         print("Running: test_reassemble_utf8, N=%s" % N)
-        self._test_reassemble(N,generateRandomJapaneseString)
+        # self._test_reassemble(N,generateRandomJapaneseString)
+        self._test_reassemble(N,generateRandomChineseString)
         print("Passed: test_reassemble_utf8, N=%s" % N)
         return
             
@@ -445,15 +470,17 @@ class test_mq(object):
         print("Passed: test_count_requests, N=%s" % N)
 
     def run(self,N):
+        # '''
         self.test_invalid_messages(N)
         self.test_match_basic(N)
         self.test_empty_messages(N)
         self.test_count_requests(N)
         self.test_reassemble_basic(N)
+        # '''
         self.test_reassemble(N)
         self.test_empty_gets(N)
         self.test_reassemble_utf8(N)
-        #self.test_long_messages(N)
+        self.test_long_messages(N)
         #self.test_get_extra(N)
 
 # tests
@@ -464,6 +491,6 @@ class test_mq(object):
 # (5) invalid messages
 
 debug=0
-N=2000
+N=500
 tmq=test_mq(debug=debug)
 tmq.run(N)
