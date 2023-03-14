@@ -386,7 +386,7 @@ Returns 0 on success, -1 on failure
   req->head=head;
   char *p;
   char *msglen;
-  int errno = 0;
+  //int errno = 0;
   // TODO: this needs to be made a lot more robust
   msglen= evbuffer_readln(incoming->input, &n_read_out, EVBUFFER_EOL_CRLF);
   debug_printf("msglen: %s\n", msglen);

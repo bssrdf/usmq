@@ -44,7 +44,7 @@ class Message(object):
         return self.head + "\r\n" + self.body
 
 def debugprint(dbg, s):
-    if dbg: print s 
+    if dbg: print(s)
 
 socket_calls=0
 def createSocket(host,port):
@@ -136,7 +136,7 @@ class client(object):
             on for testing purposes
         """
         header="GET\r\n%s" % extra
-        if (extra): print "Sending %d extra bytes." % len(extra)
+        if (extra): print("Sending %d extra bytes." % len(extra))
         self.socket.send(header)
         recv=self.socket.recv(self.n)
         return self._parse_received(recv)
@@ -192,7 +192,7 @@ class test_mq(object):
         assert count==0
 
     def test_get_extra(self,N):
-        print "Running: test_get_extra, N=%s" % N
+        print("Running: test_get_extra, N=%s" % N)
         # send N messages whose length is 0
         c=client(HOST,PORT,debug=self.debug)
         self.empty_queue(c)
@@ -215,10 +215,10 @@ class test_mq(object):
                       (msglen, retlen, retmsg)
         new_count=c.count()
         assert new_count==0
-        print "Passed: test_get_extra, N=%s" % N
+        print("Passed: test_get_extra, N=%s" % N)
 
     def test_empty_messages(self,N):
-        print "Running: test_empty_messages, N=%s" % N
+        print("Running: test_empty_messages, N=%s" % N)
         # send N messages whose length is 0
         c=client(HOST,PORT,debug=self.debug)
         self.empty_queue(c)
@@ -233,7 +233,7 @@ class test_mq(object):
             assert len(c.get())==0
         new_count=c.count()
         assert new_count==0
-        print "Passed: test_empty_messages, N=%s" % N
+        print("Passed: test_empty_messages, N=%s" % N)
 
     def test_long_messages(self,N):
         # send N messages whose length > 4096
@@ -258,7 +258,7 @@ class test_mq(object):
         assert new_count==count
             
     def test_invalid_messages(self,N):
-        print "Running: test_invalid_messages, N=%s" % N
+        print("Running: test_invalid_messages, N=%s" % N)
         c=client(HOST,PORT,debug=self.debug)
         self.empty_queue(c)
         count=c.count()
@@ -288,7 +288,7 @@ class test_mq(object):
         assert new_count==count, "New count (%d) should be equal to count (%d)." % (new_count,count)
         for i in range(0,N):
             assert c.get().is_empty()
-        print "Passed: test_invalid_messages, N=%s" % N
+        print("Passed: test_invalid_messages, N=%s" % N)
     
     
     def _test_reassemble(self,N,string_generator):
@@ -324,7 +324,7 @@ class test_mq(object):
         # numbered 0 through N-1
         # make N get requests and validate that you have all N
         # messages and that count is unchanged
-        print "Running: test_reassemble_basic, N=%s" % N
+        print("Running: test_reassemble_basic, N=%s" % N)
         c=client(HOST,PORT,debug=self.debug)
         count=c.count()
         messages=[]
@@ -340,14 +340,14 @@ class test_mq(object):
         self.compare_message_sets(return_messages, messages)
         new_count=c.count()
         assert new_count==count
-        print "Passed: test_reassemble_basic, N=%s" % N
+        print("Passed: test_reassemble_basic, N=%s" % N)
 
     def test_match_basic(self,N):
         # generate and send N messages 
         # numbered 0 through N-1
         # make M match requests and validate that you retrieved
         # only the correct messages
-        print "Running: test_match_basic, N=%s" % N
+        print("Running: test_match_basic, N=%s" % N)
         if N<2: N=2
         M=N/2
         c=client(HOST,PORT,debug=self.debug)
@@ -374,18 +374,18 @@ class test_mq(object):
         self.compare_message_sets(return_messages, match_messages)
         new_count=c.count()
         assert new_count==count + len(nonmatch_messages)
-        print "Passed: test_match_basic, N=%s" % N
+        print("Passed: test_match_basic, N=%s" % N)
 
     def test_reassemble(self,N):
-        print "Running: test_reassemble, N=%s" % N
+        print("Running: test_reassemble, N=%s" % N)
         self._test_reassemble(N,generateRandomString)
-        print "Passed: test_reassemble, N=%s" % N
+        print("Passed: test_reassemble, N=%s" % N)
         return
 
     def test_reassemble_utf8(self,N):
-        print "Running: test_reassemble_utf8, N=%s" % N
+        print("Running: test_reassemble_utf8, N=%s" % N)
         self._test_reassemble(N,generateRandomJapaneseString)
-        print "Passed: test_reassemble_utf8, N=%s" % N
+        print("Passed: test_reassemble_utf8, N=%s" % N)
         return
             
     def test_empty_gets(self,N):
@@ -393,7 +393,7 @@ class test_mq(object):
         # numbered 0 through N-1
         # make N get requests and validate that you have all N
         # messages and that count is unchanged
-        print "Running: test_emtpy_gets, N=%s" % N
+        print("Running: test_emtpy_gets, N=%s" % N)
         c=client(HOST,PORT,debug=self.debug)
         count=c.count()
         messages=[]
@@ -414,10 +414,10 @@ class test_mq(object):
             return_messages.append(c.get())
         assert len(return_messages)==N
         for m in return_messages: assert m.is_empty()
-        print "Passed: test_emtpy_gets, N=%s" % N
+        print("Passed: test_emtpy_gets, N=%s" % N)
     
     def test_count_requests(self,N):
-        print "Running: test_count_requests, N=%s" % N
+        print("Running: test_count_requests, N=%s" % N)
         c=client(HOST,PORT,debug=self.debug)
         count=c.count()
         messages=[]
@@ -437,7 +437,7 @@ class test_mq(object):
         assert new_count==count
         # empty the queue
         while (c.count()): c.get()
-        print "Passed: test_count_requests, N=%s" % N
+        print("Passed: test_count_requests, N=%s" % N)
 
     def run(self,N):
         self.test_invalid_messages(N)
