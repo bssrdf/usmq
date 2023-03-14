@@ -168,6 +168,7 @@ class client(object):
         if (extra): print("Sending %d extra bytes." % len(extra))
         self.socket.send(header.encode())
         recv=self.socket.recv(self.n)
+        # print('in get, received:', len(recv))
         return self._parse_received(recv.decode())
 
     def match(self,head):
@@ -188,7 +189,7 @@ class client(object):
         body='\r\n'.join(lines[1:])
         return Message(head,body)
     
-    def send_random_valid(minlength, maxlength, minlines, maxlines):    
+    def send_random_valid(self, minlength, maxlength, minlines, maxlines):    
         msg=generateRandomString(minlength, maxlength, minlines, maxlines)
         head=generateRandomString(minlength, maxlength, 1, 1)
         return self.put(head,msg)
@@ -235,7 +236,7 @@ class test_mq(object):
             body="body-%s" % num 
             c.put(head,body)
         msglen=len("head-") + len("body-") + 2 * lenN
-        import pdb ; pdb.set_trace()
+        # import pdb ; pdb.set_trace()
         for i in range(0,N):
             extra_bytes="a"*(4096 + random.randint(1,100))
             retmsg=c.get(extra=extra_bytes)
@@ -265,24 +266,29 @@ class test_mq(object):
         print("Passed: test_empty_messages, N=%s" % N)
 
     def test_long_messages(self,N):
+        print("Running: test_long_messages, N=%s" % N)
         # send N messages whose length > 4096
         # the result should be that the messages are stored, but truncated
-        c=client(HOST,PORT,debug=self.debug)
+        # c=client(HOST,PORT,debug=self.debug)
+        c=client(HOST,PORT,bytes_to_read=8192,debug=self.debug)
+        
         count=c.count()
         messages=[]
         return_messages=[]
+        msgs = []
         for i in range(0,N):
             msg="a"*(4096 + random.randint(1,100))
             head="head-%d" % random.randint(10,99)
             messages.append(msg)
         for i in range(0,N):
             c.put(head,messages[i])
+            msgs.append(Message(head,messages[i]))
         # confirm that message length is 4089
         # 4089 = 4096 - len("PUT\r\n") - len("\r\n") - the trailing CRLF + len(head)A
         # and len(head)=7
         for i in range(0,N):
-            rmsg=c.get()
-            assert len(rmsg)==4089, "Message is supposed to have length 4096, but it has length %d." % len(rmsg)
+            rmsg=c.get() 
+            assert len(rmsg)==len(msgs[i]), "Message is supposed to have length %d, but it has length %d." % (len(msgs[i]), len(rmsg))
         new_count=c.count()
         assert new_count==count
             
@@ -413,8 +419,8 @@ class test_mq(object):
 
     def test_reassemble_utf8(self,N):
         print("Running: test_reassemble_utf8, N=%s" % N)
-        # self._test_reassemble(N,generateRandomJapaneseString)
-        self._test_reassemble(N,generateRandomChineseString)
+        self._test_reassemble(N,generateRandomJapaneseString)
+        # self._test_reassemble(N,generateRandomChineseString)
         print("Passed: test_reassemble_utf8, N=%s" % N)
         return
             
@@ -481,7 +487,7 @@ class test_mq(object):
         self.test_empty_gets(N)
         self.test_reassemble_utf8(N)
         self.test_long_messages(N)
-        #self.test_get_extra(N)
+        self.test_get_extra(N)
 
 # tests
 # (1) reassemble
@@ -491,6 +497,6 @@ class test_mq(object):
 # (5) invalid messages
 
 debug=0
-N=500
+N=1000
 tmq=test_mq(debug=debug)
 tmq.run(N)
