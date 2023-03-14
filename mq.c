@@ -195,6 +195,8 @@ void buffer_read_cb(struct bufferevent *incoming, void *arg)
   debug_printf("Queue size (1): %d.\n", messagelist->count);
 
   request *req=(request *)malloc(sizeof(request));
+  if (!req) debug_printf("request not created \n");
+  
   size_t buffer_len = evbuffer_get_length(incoming->input);
   debug_printf("Incoming buffer is of length %d.\n", buffer_len);
   int request_type=parse_request(incoming,evreturn,req);
@@ -221,7 +223,11 @@ void buffer_read_cb(struct bufferevent *incoming, void *arg)
       {
           debug_printf("GET: Adding message (head: %s, body: %s) to evbuffer (len=%d)\n\n", msg->head, 
                    msg->body, strlen(msg->body));
-          evbuffer_add_printf(evreturn,"%s\r\n%s\r\n", msg->head, msg->body);
+          int nbytes = evbuffer_add_printf(evreturn,"%s\r\n%s\r\n", msg->head, msg->body);
+          if(nbytes < 0)
+              debug_printf("error in writign to outgoing buffer\n");
+          else
+              debug_printf("wrote %d bytes\n", nbytes); 
           free(msg->head);
           free(msg->body);
           free(msg);
@@ -244,6 +250,7 @@ void buffer_read_cb(struct bufferevent *incoming, void *arg)
           debug_printf("MATCH: Adding message (head: %s, body: %s) to evbuffer (len=%d)\n\n", msg->head, 
                    msg->body, strlen(msg->body));
           evbuffer_add_printf(evreturn,"%s\r\n%s\r\n", msg->head, msg->body);
+             
           free(msg->head);
           free(msg->body);
           free(msg);
@@ -329,7 +336,8 @@ int parse_request(struct bufferevent *incoming, struct evbuffer *evreturn, reque
          request is NOT valid
       */
       int extra_bytes=drain_extra(incoming,msgtype);
-      if (!extra_bytes) { req->type=GET_REQUEST; }
+      // if (!extra_bytes) { req->type=GET_REQUEST; }
+      req->type=GET_REQUEST;
   }
   else if (msgtype && !strcmp(msgtype,MATCH)) 
   { 
