@@ -119,16 +119,20 @@ class client(object):
     
     def put(self, head, msg):
         msg=self.createMessage(head, msg)
-        self.socket.send(msg)
+        self.socket.send(msg.encode())
         debugprint(self.debug,"Sending message (%s): %s" % (len(msg),msg))
         recv=self.socket.recv(self.n)
         return recv
     
     def count(self):
         header="COUNT\r\n"
-        self.socket.send(header)
+        self.socket.send(header.encode())
         recv=self.socket.recv(self.n)
-        return int(recv)
+        print('recv = ', recv)
+        s = recv.decode()
+        if s:
+           return int(s)
+        return 0   
     
     def get(self,extra=""):
         """ send a GET request
@@ -137,15 +141,15 @@ class client(object):
         """
         header="GET\r\n%s" % extra
         if (extra): print("Sending %d extra bytes." % len(extra))
-        self.socket.send(header)
+        self.socket.send(header.encode())
         recv=self.socket.recv(self.n)
-        return self._parse_received(recv)
+        return self._parse_received(recv.decode())
 
     def match(self,head):
         header="MATCH\r\n%s\r\n" % head
-        self.socket.send(header)
+        self.socket.send(header.encode())
         recv=self.socket.recv(self.n)
-        return self._parse_received(recv)
+        return self._parse_received(recv.decode())
 
     def _parse_received(self,recv):
         # last two chars should be \r\n
@@ -167,7 +171,7 @@ class client(object):
     def send(self,msg):
         """ unlike put, doesn't append PUT to the message --
             good for sending invalid messages"""
-        self.socket.send(msg)
+        self.socket.send(msg.encode())
         debugprint(self.debug,"Sending message (%s): %s" % (len(msg),msg))
         recv=self.socket.recv(self.n)
         debugprint(self.debug,"Received: %s" % (recv))
@@ -349,7 +353,7 @@ class test_mq(object):
         # only the correct messages
         print("Running: test_match_basic, N=%s" % N)
         if N<2: N=2
-        M=N/2
+        M=N//2
         c=client(HOST,PORT,debug=self.debug)
         count=c.count()
         nonmatch_messages=[]
