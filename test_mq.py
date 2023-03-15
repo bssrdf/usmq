@@ -165,7 +165,7 @@ class client(object):
             on for testing purposes
         """
         header="GET\r\n%s" % extra
-        if (extra): print("Sending %d extra bytes." % len(extra))
+        # if (extra): print("Sending %d extra bytes." % len(extra))
         self.socket.send(header.encode())
         recv=self.socket.recv(self.n)
         # print('in get, received:', len(recv))
@@ -277,7 +277,7 @@ class test_mq(object):
         return_messages=[]
         msgs = []
         for i in range(0,N):
-            msg="a"*(4096 + random.randint(1,100))
+            msg="a"*(4096 + random.randint(1,2000))
             head="head-%d" % random.randint(10,99)
             messages.append(msg)
         for i in range(0,N):
@@ -291,6 +291,7 @@ class test_mq(object):
             assert len(rmsg)==len(msgs[i]), "Message is supposed to have length %d, but it has length %d." % (len(msgs[i]), len(rmsg))
         new_count=c.count()
         assert new_count==count
+        print("Passed: test_long_messages, N=%s" % N)
             
     def test_invalid_messages(self,N):
         print("Running: test_invalid_messages, N=%s" % N)
